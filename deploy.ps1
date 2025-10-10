@@ -1,6 +1,6 @@
 docker build -t nestjs-app:latest .
 
-minikube start --memory=512mb --cpus=1
+minikube start --memory=1800mb --cpus=2
 
 minikube docker-env | Invoke-Expression
 
