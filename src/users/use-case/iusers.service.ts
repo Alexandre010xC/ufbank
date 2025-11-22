@@ -1,10 +1,13 @@
 import { CreateUserDto } from '../domain/dto/create-user.dto';
 import { UpdateUserDto } from '../domain/dto/update-user.dto';
 
-export interface iUsers {
-  create(createUserDto: CreateUserDto) : string;
-  findAll() : string;
-  findOne(id: number) : string;
-  update(id: number, updateUserDto: UpdateUserDto) : string;
-  remove(id: number) : string;
-}      
+export abstract class IUsersService {
+  abstract create(createUserDto: CreateUserDto): CreateUserDto;
+  abstract findAll(): CreateUserDto[];
+  abstract findOne(id: number): CreateUserDto | null;
+  abstract update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): CreateUserDto | string;
+  abstract remove(id: number): string;
+}
