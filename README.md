@@ -101,3 +101,13 @@ A API estará disponível em:
   "clienteId": 1
 }
 ```
+
+<br/>
+
+## 👤 Autores do Projeto
+
+- Alexandre Coelho Batista dos Santos
+- Larissa Conrado de Figueiredo
+- Letícia Menezes Costa
+- Lorena Roberta Nascimento dos Santos
+- Rafael Luis Caldas Vaz
