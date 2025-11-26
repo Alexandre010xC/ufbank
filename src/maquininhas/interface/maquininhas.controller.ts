@@ -1,29 +1,29 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
-import { IMaquininhasService } from '../use-case/imaquininhas.service';
+import { Controller, Post, Get, Patch, Param, Body } from '@nestjs/common';
+import { MaquininhasService } from '../use-case/maquininhas.service';
 import { CreateMaquininhaDto } from '../domain/dto/create-maquininha.dto';
-// import { RolesGuard } from '../../auth/roles.guard'; // Descomente quando usar
-// import { Roles } from '../../auth/roles.decorator';
-// import { UserRole } from '../../users/domain/entity/user.entity';
+import { UpdateMaquininhaDto } from '../domain/dto/update-maquininha.dto';
 
 @Controller('maquininhas')
-// @UseGuards(RolesGuard) // Ative quando a Auth estiver pronta
 export class MaquininhasController {
-  constructor(private readonly maquininhasService: IMaquininhasService) {}
+  constructor(private service: MaquininhasService) {}
 
   @Post()
-  // @Roles(UserRole.ADMIN)
-  create(@Body() createMaquininhaDto: CreateMaquininhaDto) {
-    return this.maquininhasService.create(createMaquininhaDto);
+  create(@Body() dto: CreateMaquininhaDto) {
+    return this.service.create(dto);
   }
 
   @Get()
-  // @Roles(UserRole.ADMIN) 
   findAll() {
-    return this.maquininhasService.findAll();
+    return this.service.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.maquininhasService.findOne(+id);
+  findOne(@Param('id') id: number) {
+    return this.service.findOne(id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: number, @Body() dto: UpdateMaquininhaDto) {
+    return this.service.update(id, dto);
   }
 }

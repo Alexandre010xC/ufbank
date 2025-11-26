@@ -1,13 +1,18 @@
 export enum MaquininhaStatus {
-  ESTOQUE = 'ESTOQUE', 
+  ESTOQUE = 'ESTOQUE',
   ATIVA = 'ATIVA',
-  MANUTENCAO = 'MANUTENCAO' 
+  MANUTENCAO = 'MANUTENCAO'
 }
 
 export class Maquininha {
-  id: number;
-  codigoSerial: string; // O número único atrás da máquina (ex: SN123456)
-  modelo: string;       // Ex: "Moderninha Pro", "Smart"
-  status: MaquininhaStatus;
-  clienteId?: number;   // Pode ser nulo se estiver no estoque (sem dono)
+  constructor(
+    public id: number,
+    public modelo: string,
+    public status: MaquininhaStatus,
+    public codigoSerial: string,
+    public clienteId: number | null,
+    public monthlyProfit: number,
+    public interestRate: number,
+    public repassePercent: number,
+  ) {}
 }

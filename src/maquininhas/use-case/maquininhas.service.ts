@@ -1,45 +1,47 @@
 import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
-import { IMaquininhasService } from './imaquininhas.service';
 import { CreateMaquininhaDto } from '../domain/dto/create-maquininha.dto';
+import { UpdateMaquininhaDto } from '../domain/dto/update-maquininha.dto';
 import { Maquininha, MaquininhaStatus } from '../domain/entity/maquininha.entity';
-import { UserRole } from 'src/users/domain/entities/user.entity';
+import { MaquininhasRules } from './maquininhas.rules';
 import { IUsersService } from 'src/users/use-case/iusers.service';
+import { UserRole } from 'src/users/domain/entities/user.entity';
 
 @Injectable()
-export class MaquininhasService implements IMaquininhasService {
-  
+export class MaquininhasService {
+
   private maquininhas: Maquininha[] = [];
   private idCounter = 1;
-  constructor(private readonly usersService: IUsersService) {}
+
+  constructor(private usersService: IUsersService) {}
 
   create(dto: CreateMaquininhaDto): Maquininha {
-    const existeCodigoSerial = this.maquininhas.find(m => m.codigoSerial === dto.codigoSerial);
-    if (existeCodigoSerial) {
-      throw new ConflictException('Já existe uma maquininha com este Serial Number.');
-    }
+
+    const existe = this.maquininhas.find(m => m.codigoSerial === dto.codigoSerial);
+    if (existe) throw new ConflictException('Já existe uma maquininha com este Serial.');
 
     if (dto.clienteId) {
-      const usuario = this.usersService.findOne(dto.clienteId);
-
-      if (usuario === null) {
-         throw new NotFoundException('Cliente não encontrado.');
-      }
-
-      if (usuario.role === UserRole.ADMIN) {
-        throw new BadRequestException('Não é permitido vincular maquininhas a um Administrador. Vincule apenas a Clientes.');
-      }
+      const user = this.usersService.findOne(dto.clienteId);
+      if (!user) throw new NotFoundException('Cliente não encontrado.');
+      if (user.role === UserRole.ADMIN)
+        throw new BadRequestException('Admin não pode ter maquininha.');
     }
 
-    const novaMaquininha: Maquininha = {
-      id: this.idCounter++,
-      codigoSerial: dto.codigoSerial,
-      modelo: dto.modelo,
-      status: dto.status || MaquininhaStatus.ESTOQUE,
-      clienteId: dto.clienteId || undefined,
-    };
+    const taxa = MaquininhasRules.calcularTaxa(dto.monthlyProfit);
+    const repasse = MaquininhasRules.calcularRepasse(taxa);
 
-    this.maquininhas.push(novaMaquininha);
-    return novaMaquininha;
+    const nova = new Maquininha(
+      this.idCounter++,
+      dto.modelo,
+      dto.status || MaquininhaStatus.ESTOQUE,
+      dto.codigoSerial,
+      dto.clienteId ?? null,
+      dto.monthlyProfit,
+      taxa,
+      repasse
+    );
+
+    this.maquininhas.push(nova);
+    return nova;
   }
 
   findAll(): Maquininha[] {
@@ -47,10 +49,25 @@ export class MaquininhasService implements IMaquininhasService {
   }
 
   findOne(id: number): Maquininha {
-    const maq = this.maquininhas.find(m => m.id === id);
-    if (!maq) {
-      throw new NotFoundException('Maquininha não encontrada.');
+    const m = this.maquininhas.find(x => x.id === id);
+    if (!m) throw new NotFoundException('Maquininha não encontrada.');
+    return m;
+  }
+
+  update(id: number, dto: UpdateMaquininhaDto): Maquininha {
+    const m = this.findOne(id);
+
+    if (dto.modelo) m.modelo = dto.modelo;
+    if (dto.status) m.status = dto.status;
+    if (dto.clienteId !== undefined) m.clienteId = dto.clienteId;
+    if (dto.monthlyProfit !== undefined) {
+      m.monthlyProfit = dto.monthlyProfit;
+
+      const taxa = MaquininhasRules.calcularTaxa(m.monthlyProfit);
+      m.interestRate = taxa;
+      m.repassePercent = MaquininhasRules.calcularRepasse(taxa);
     }
-    return maq;
+
+    return m;
   }
 }
