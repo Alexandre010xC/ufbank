@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsOptional, IsNumber, Min } from 'class-validator';
 import { MaquininhaStatus } from '../entity/maquininha.entity';
 
 export class CreateMaquininhaDto {
@@ -11,10 +11,14 @@ export class CreateMaquininhaDto {
   modelo: string;
 
   @IsEnum(MaquininhaStatus)
-  @IsOptional() // Se não mandar, assumimos que é ESTOQUE
+  @IsOptional()
   status?: MaquininhaStatus;
 
   @IsNumber()
-  @IsOptional() // Pode criar sem dono (para estoque)
+  @IsOptional()
   clienteId?: number;
+
+  @IsNumber()
+  @Min(0, { message: 'O lucro mensal não pode ser negativo' })
+  monthlyProfit: number;
 }
