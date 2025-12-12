@@ -3,8 +3,9 @@ import { CreateMaquininhaDto } from '../domain/dto/create-maquininha.dto';
 import { UpdateMaquininhaDto } from '../domain/dto/update-maquininha.dto';
 import { Maquininha, MaquininhaStatus } from '../domain/entity/maquininha.entity';
 import { MaquininhasRules } from './maquininhas.rules';
-import { IUsersService } from 'src/users/use-case/iusers.service';
-import { UserRole } from 'src/users/domain/entities/user.entity';
+// CORREÇÃO AQUI: Mudamos de 'src/...' para o caminho relativo '../../'
+import { IUsersService } from '../../users/use-case/iusers.service';
+import { UserRole } from '../../users/domain/entities/user.entity';
 
 @Injectable()
 export class MaquininhasService {

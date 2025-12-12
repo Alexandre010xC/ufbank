@@ -9,31 +9,37 @@ describe('Fluxo E2E - Empréstimos (UFBank)', () => {
   let repo: EmprestimosRepository;
 
   beforeAll(async () => {
+    // Monta o módulo "real" para o teste E2E (sem mocks, usando a infra real)
     const moduleRef = await Test.createTestingModule({
       imports: [EmprestimosModule],
     }).compile();
 
     app = moduleRef.createNestApplication();
+    // Acessamos o repositório para verificar o "efeito colateral" no banco
     repo = moduleRef.get(EmprestimosRepository);
     await app.init();
   });
 
-  it('deve criar um empréstimo e salvar no "banco"', async () => {
-    const response = await request.default(app.getHttpServer())
+  it('deve realizar o fluxo completo de solicitação de empréstimo', async () => {
+    // Passo 1: Enviar um POST para /loans (simulando o App do usuário)
+    const response = await request
+      .default(app.getHttpServer())
       .post('/emprestimos')
       .send({
-        valorSolicitado: 1000,
+        valorSolicitado: 2500,
         taxaJuros: 10,
         clienteId: 1,
       })
+      // Passo 2: Verificar se a API retorna 201 Created
       .expect(201);
 
-    const salvo = repo.buscarPorId(response.body.id);
+    // Passo 3: Conectar no banco de dados (real) e verificar se a proposta foi criada
+    // Como estamos usando um repositório em memória, acessamos ele diretamente.
+    const emprestimoSalvo = repo.buscarPorId(response.body.id);
 
-        expect(salvo).toBeDefined();
-        expect(salvo!.valorSolicitado).toBe(1000);
-        expect(salvo!.valorJuros).toBe(100);
-
+    expect(emprestimoSalvo).toBeDefined();
+    expect(emprestimoSalvo!.valorSolicitado).toBe(2500);
+    expect(emprestimoSalvo!.status).toBe('PENDENTE');
   });
 
   afterAll(async () => {

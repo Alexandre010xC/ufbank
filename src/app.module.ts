@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from './users/users.module ';
+import { UsersModule } from './users/users.module';
 import { MaquininhasModule } from './maquininhas/maquininhas.module';
 import { EmprestimosModule } from './loans/loans.module';
 
